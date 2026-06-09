@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Minhas Missões</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { background:#E0E0E0; font-family:-apple-system,'Helvetica Neue',sans-serif; display:flex; justify-content:center; min-height:100vh; }
+.phone { width:390px; height:100vh; background:#fff; position:relative; overflow:hidden; }
+.screen { position:absolute; top:0; left:0; width:100%; height:100%; overflow-y:auto; overflow-x:hidden; background:#F0F0F2; transition:transform .3s cubic-bezier(.32,.72,0,1); }
+.screen.hidden { transform:translateX(100%); }
+.screen.white { background:#fff; }
+
+/* NAV */
+.nav { padding:14px 20px 10px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:inherit; z-index:5; }
+.nav-back { font-size:15px; font-weight:600; color:#EC7000; cursor:pointer; }
+.nav-title { font-size:17px; color:#111; }
+.nav-help { width:28px; height:28px; border:1.5px solid #999; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#999; font-size:13px; }
+
+/* HOME ITAU */
+.home-content { padding:14px 20px 100px; }
+.search-bar { background:#fff; border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:12px; margin-bottom:18px; border:1px solid #DDD; }
+.search-bar span { font-size:15px; color:#aaa; }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+.grid-card { background:#fff; border-radius:14px; padding:18px 14px 14px; display:flex; flex-direction:column; gap:36px; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,.07); }
+.grid-card.highlight { background:#FEF3E8; border:2px solid #EC7000; }
+.grid-card-name { font-size:14px; font-weight:500; color:#111; line-height:1.3; }
+.grid-card.highlight .grid-card-name { color:#EC7000; font-weight:700; }
+.section-label { font-size:18px; font-weight:700; color:#111; margin-bottom:12px; }
+.bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:390px; background:#fff; border-top:1px solid #EEE; display:flex; justify-content:space-around; align-items:center; padding:10px 0 20px; z-index:100; }
+.bnav-item { display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; }
+.bnav-item span { font-size:10px; color:#666; }
+.bnav-orange { background:#EC7000; border-radius:14px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+
+/* SEGUROS PAGE */
+.seg-content { padding:12px 20px 80px; }
+.actions-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:22px; }
+.action-card { background:#fff; border-radius:14px; padding:14px 12px; display:flex; flex-direction:column; gap:10px; box-shadow:0 1px 3px rgba(0,0,0,.07); cursor:pointer; }
+.action-card span { font-size:13px; font-weight:700; color:#111; line-height:1.3; }
+.section-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.section-title { font-size:18px; font-weight:700; color:#111; }
+.section-link { font-size:14px; color:#666; }
+
+/* MM CARD */
+.mm-card { background:#EC7000; border-radius:14px; padding:18px 16px; margin-bottom:10px; cursor:pointer; box-shadow:0 4px 14px rgba(236,112,0,.3); }
+.mm-top { display:flex; align-items:center; gap:14px; margin-bottom:14px; }
+.mm-icon { width:48px; height:48px; border-radius:12px; background:rgba(255,255,255,.2); display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0; gap:1px; }
+.mm-icon-num { font-size:18px; font-weight:800; color:#fff; line-height:1; }
+.mm-icon-lbl { font-size:8px; color:rgba(255,255,255,.85); font-weight:600; }
+.mm-name { font-size:15px; font-weight:700; color:#fff; }
+.mm-desc { font-size:12px; color:rgba(255,255,255,.85); margin-top:2px; line-height:1.3; }
+.mm-bar-row { display:flex; justify-content:space-between; margin-bottom:6px; }
+.mm-bar-label { font-size:12px; color:rgba(255,255,255,.85); }
+.mm-bar-pct { font-size:12px; font-weight:700; color:#fff; }
+.mm-track { height:4px; background:rgba(255,255,255,.3); border-radius:99px; overflow:hidden; }
+.mm-fill { height:100%; background:#fff; border-radius:99px; }
+
+/* PROT CARD */
+.prot-card { background:#fff; border-radius:14px; padding:16px; margin-bottom:10px; display:flex; align-items:center; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.07); cursor:pointer; }
+.prot-icon { width:48px; height:48px; border-radius:12px; background:#EC7000; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.prot-name { font-size:15px; font-weight:500; color:#111; }
+
+/* DETAIL / HERO */
+.detail-body { padding:0 20px 80px; }
+.hero { display:flex; flex-direction:column; align-items:center; padding:16px 0 10px; }
+.hex-wrap { position:relative; width:120px; height:120px; margin-bottom:10px; }
+.hero-title { font-size:22px; font-weight:700; color:#111; margin-bottom:4px; }
+.hero-link { font-size:14px; color:#666; display:flex; align-items:center; gap:4px; cursor:pointer; margin-bottom:10px; }
+.stats-card { background:#F5F5F5; border-radius:16px; display:flex; width:100%; margin-bottom:10px; overflow:hidden; }
+.stat { flex:1; padding:14px; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.stat+.stat { border-left:1px solid #E0E0E0; }
+.stat-icon { margin-bottom:2px; }
+.stat-label { font-size:12px; color:#666; text-align:center; line-height:1.3; }
+.stat-value { font-size:18px; font-weight:700; color:#111; }
+
+/* BENEFITS BANNER */
+.benefits { background:#EC7000; border-radius:14px; padding:16px 18px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; box-shadow:0 4px 12px rgba(236,112,0,.25); }
+.benefits-text { font-size:14px; color:#fff; flex:1; line-height:1.4; font-weight:500; }
+.benefits-link { font-size:13px; font-weight:700; color:#fff; white-space:nowrap; margin-left:10px; background:rgba(255,255,255,.2); padding:6px 12px; border-radius:99px; }
+
+/* REC */
+.rec { background:#fff; border-radius:14px; border:1px solid #F0F0F0; padding:14px; margin-bottom:14px; box-shadow:0 1px 4px rgba(0,0,0,.06); cursor:pointer; }
+.rec-label { font-size:11px; color:#aaa; margin-bottom:10px; text-transform:uppercase; letter-spacing:.2px; }
+.rec-body { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+.rec-icon { width:40px; height:40px; border-radius:10px; background:#FEF3E8; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.rec-title { font-size:15px; font-weight:700; color:#111; line-height:1.4; }
+.rec-footer { display:flex; align-items:center; justify-content:space-between; border-top:1px solid #F5F5F5; padding-top:12px; }
+.rec-action { font-size:14px; font-weight:600; color:#111; }
+.rec-arr { font-size:16px; color:#666; }
+
+/* BLOCKS */
+.blocks-title { font-size:16px; font-weight:700; color:#111; margin-bottom:10px; }
+.blocks-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.block { background:#fff; border-radius:14px; padding:14px; box-shadow:0 1px 4px rgba(0,0,0,.07); cursor:pointer; display:flex; flex-direction:column; gap:12px; border:1px solid #F5F5F5; }
+.block-name { font-size:12px; color:#666; line-height:1.3; margin-bottom:2px; }
+.block-count { font-size:14px; font-weight:700; color:#111; }
+
+/* PREREQ WARNING */
+.prereq-warn { background:#FEF3E8; border-radius:12px; padding:12px 16px; margin-bottom:10px; display:flex; align-items:flex-start; gap:10px; }
+.prereq-warn-text { font-size:12px; color:#555; line-height:1.4; flex:1; }
+.prereq-warn strong { color:#EC7000; }
+
+/* LEVELS */
+.level-card { border-radius:16px; overflow:hidden; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.07); }
+.level-header { padding:14px 16px; display:flex; align-items:center; gap:10px; cursor:pointer; }
+.level-body { background:#fff; padding:4px 0; }
+.level-benefit { display:flex; align-items:center; gap:14px; padding:12px 16px; border-bottom:1px solid #F5F5F5; }
+.level-benefit:last-child { border-bottom:none; }
+.benefit-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.benefit-title { font-size:14px; font-weight:700; color:#666; margin-bottom:2px; }
+.benefit-desc { font-size:12px; color:#888; line-height:1.4; }
+.level-inherit { padding:10px 16px; background:#F9F9F9; border-bottom:1px solid #F0F0F0; font-size:11px; color:#aaa; font-weight:600; }
+.level-locked { display:flex; align-items:center; justify-content:space-between; padding-top:14px; border-top:1px solid #F5F5F5; }
+.level-locked-label { font-size:12px; color:#aaa; font-weight:600; }
+.level-locked-btn { font-size:11px; font-weight:700; padding:4px 10px; border-radius:99px; }
+.excl-badge { font-size:10px; font-weight:700; padding:2px 8px; border-radius:99px; white-space:nowrap; }
+
+/* CAT SCREENS */
+.cat-hero { padding:18px 20px 0; }
+.cat-hero-title { font-size:20px; font-weight:800; color:#111; margin-bottom:4px; }
+.cat-hero-sub { font-size:13px; color:#666; margin-bottom:14px; }
+.cat-progress-bar { height:6px; background:#EEE; border-radius:99px; overflow:hidden; margin-bottom:5px; }
+.cat-progress-fill { height:100%; border-radius:99px; }
+.cat-progress-label { font-size:12px; color:#666; margin-bottom:18px; }
+.section-lbl { font-size:11px; font-weight:700; color:#aaa; letter-spacing:.3px; padding:10px 20px 5px; text-transform:uppercase; }
+.mission-item { display:flex; align-items:flex-start; gap:14px; padding:14px 20px; border-bottom:1px solid #F5F5F5; cursor:pointer; }
+.mission-item:last-child { border-bottom:none; }
+.mission-status { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+.mission-status.done { background:#1B5E35; }
+.mission-status.pending { background:#F0F0F0; }
+.mission-title { font-size:14px; font-weight:700; color:#111; margin-bottom:3px; line-height:1.3; }
+.mission-title.done { color:#aaa; text-decoration:line-through; }
+.mission-desc { font-size:12px; color:#666; line-height:1.4; }
+.mission-pts { font-size:11px; font-weight:700; border-radius:99px; padding:3px 8px; display:inline-block; margin-top:5px; }
+.mission-pts.done { background:#E8F5ED; color:#1B5E35; }
+.mission-pts.pending { background:#F5F5F5; color:#666; }
+.annual-tag { font-size:10px; font-weight:700; color:#EC7000; background:#FEF3E8; padding:2px 6px; border-radius:99px; margin-left:6px; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+<!-- SCREEN 1: ITAU HOME -->
+<div class="screen" id="s-home">
+  <div class="home-content">
+    <div class="search-bar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span>O que você procura?</span>
+    </div>
+    <div class="grid2">
+      <div class="grid-card"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#EC7000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><span class="grid-card-name">Cartões</span></div>
+      <div class="grid-card"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#EC7000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span class="grid-card-name">Crédito</span></div>
+      <div class="grid-card"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#EC7000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span class="grid-card-name">Itaú Shop</span></div>
+      <div class="grid-card"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#EC7000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span class="grid-card-name">Investimentos</span></div>
+    </div>
+    <div class="section-label">Aproveite mais o Itaú</div>
+    <div class="grid2">
+      <div class="grid-card"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#EC7000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg><span class="grid-card-name">Informe de Rendimentos</span></div>
+      <div class="grid-card highlight" id="btn-seguros"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#EC7000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span class="grid-card-name">Seguros e planos</span></div>
+    </div>
+  </div>
+  <div class="bottom-nav">
+    <div class="bnav-item"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Início</span></div>
+    <div class="bnav-item"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg><span>Extrato</span></div>
+    <div class="bnav-item"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg><span>Pagamentos</span></div>
+    <div class="bnav-item"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/><path d="M12 12v4"/><path d="M10 14h4"/></svg><span>Pra você</span></div>
+    <div class="bnav-orange" id="btn-seguros2"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+  </div>
+</div>
+
+<!-- SCREEN 2: SEGUROS -->
+<div class="screen hidden" id="s-seguros">
+  <div class="nav">
+    <span style="font-size:20px;color:#111;cursor:pointer;" id="btn-back-home">‹</span>
+    <span class="nav-title">Seguros e planos</span>
+    <div class="nav-help">?</div>
+  </div>
+  <div class="seg-content">
+    <div class="actions-grid">
+      <div class="action-card"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EC7000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><span>Acionar seguro</span></div>
+      <div class="action-card"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EC7000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg><span>Seguros acionados</span></div>
+      <div class="action-card"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EC7000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg><span>Conectar seguros</span></div>
+    </div>
+    <div class="section-row"><span class="section-title">Proteções pra você</span><span class="section-link">Exibir todas ›</span></div>
+    <!-- MM CARD -->
+    <div class="mm-card" id="btn-mm">
+      <div class="mm-top">
+        <div class="mm-icon">
+          <div id="mm-hex" style="width:26px;height:26px;background:#fff;clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;align-items:center;justify-content:center;"><span id="mm-hex-num" style="font-size:13px;font-weight:800;color:#CD7F32;">1</span></div>
+          <span class="mm-icon-lbl">NÍVEL</span>
+        </div>
+        <div><div class="mm-name">Minhas Missões</div><div class="mm-desc">Conheça seu seguro, avance de nível e ganhe benefícios exclusivos</div></div>
+      </div>
+      <div class="mm-bar-row"><span class="mm-bar-label" id="mm-label">1 de 15 missões concluídas</span><span class="mm-bar-pct" id="mm-pct">7%</span></div>
+      <div class="mm-track"><div class="mm-fill" id="mm-fill" style="width:7%"></div></div>
+    </div>
+    <div class="prot-card"><div class="prot-icon" style="background:#EC7000;border-radius:12px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div><span class="prot-name">Conta, Cartão e Celular</span></div>
+    <div class="prot-card"><div class="prot-icon" style="background:#EC7000;border-radius:12px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4m0 4h.01"/></svg></div><span class="prot-name">Vida, Pet e Odonto</span></div>
+    <div class="prot-card"><div class="prot-icon" style="background:#EC7000;border-radius:12px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><span class="prot-name">Carro, Moto e Casa</span></div>
+  </div>
+</div>
+
+<!-- SCREEN 3: MINHAS MISSÕES DETAIL -->
+<div class="screen hidden white" id="s-detail">
+  <div class="nav">
+    <span class="nav-back" id="btn-back-seg">‹ Voltar</span>
+    <span class="nav-title">Minhas Missões</span>
+    <div style="width:60px"></div>
+  </div>
+  <div class="detail-body">
+    <div class="hero">
+      <div class="hex-wrap">
+        <svg id="hero-svg" width="120" height="120" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="54" fill="none" stroke="#EEE" stroke-width="6"/>
+          <circle id="hero-arc" cx="60" cy="60" r="54" fill="none" stroke="#CD7F32" stroke-width="6" stroke-dasharray="85 254" stroke-dashoffset="85" stroke-linecap="round"/>
+          <path id="hero-shield" d="M60 28 L82 36 L82 58 C82 72 60 82 60 82 C60 82 38 72 38 58 L38 36 Z" fill="#CD7F32"/>
+          <text x="60" y="55" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="#fff" font-family="-apple-system,Helvetica Neue,sans-serif" id="hero-num">1</text>
+        </svg>
+      </div>
+      <div class="hero-title" id="hero-title">Você está no nível 1</div>
+      <div class="hero-link" id="btn-levels">Confira todos os níveis <span>›</span></div>
+      <div class="stats-card">
+        <div class="stat">
+          <div class="stat-icon"><svg width="20" height="20" viewBox="34 24 52 62"><path d="M60 28 L82 36 L82 58 C82 72 60 82 60 82 C60 82 38 72 38 58 L38 36 Z" fill="#003087"/></svg></div>
+          <span class="stat-label">Você já conquistou</span>
+          <span class="stat-value" id="stat-earned">1 escudo</span>
+        </div>
+        <div class="stat">
+          <div class="stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          <span class="stat-label" id="stat-next-label">Faltam para o nível 2</span>
+          <span class="stat-value" id="stat-next">5 escudos</span>
+        </div>
+      </div>
+      <div id="prereq-container"></div>
+    </div>
+    <div class="benefits" id="btn-benefits"><span class="benefits-text">Acumule missões e desbloqueie vantagens exclusivas</span><span class="benefits-link">Ver benefícios ›</span></div>
+    <div class="rec" id="btn-rec">
+      <div class="rec-label">Missão recomendada</div>
+      <div class="rec-body"><div class="rec-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EC7000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><span class="rec-title">Indique seu beneficiário e garanta que sua família está protegida</span></div>
+      <div class="rec-footer"><span class="rec-action">Indicar beneficiário</span><span class="rec-arr">›</span></div>
+    </div>
+    <div class="blocks-title">Missões por categoria</div>
+    <div class="blocks-grid">
+      <div class="block" data-cat="cat1"><div style="position:relative;width:44px;height:44px;"><svg width="44" height="44" viewBox="0 0 44 44" style="position:absolute;top:0;left:0;"><circle cx="22" cy="22" r="19" fill="none" stroke="#EEE" stroke-width="3.5"/><circle id="arc-cat1" cx="22" cy="22" r="19" fill="none" stroke="#EC7000" stroke-width="3.5" stroke-dasharray="30 89" stroke-dashoffset="30" stroke-linecap="round"/></svg><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;background:#FEF3E8;border-radius:50%;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EC7000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div></div><div><div class="block-name">Completude Cadastral</div><div class="block-count" id="count-cat1">1 de 5 missões</div></div></div>
+      <div class="block" data-cat="cat2"><div style="position:relative;width:44px;height:44px;"><svg width="44" height="44" viewBox="0 0 44 44" style="position:absolute;top:0;left:0;"><circle cx="22" cy="22" r="19" fill="none" stroke="#EEE" stroke-width="3.5"/><circle id="arc-cat2" cx="22" cy="22" r="19" fill="none" stroke="#EC7000" stroke-width="3.5" stroke-dasharray="0 119" stroke-dashoffset="30" stroke-linecap="round"/></svg><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;background:#EBF3FF;border-radius:50%;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div></div><div><div class="block-name">Conhecimento do Produto</div><div class="block-count" id="count-cat2">0 de 4 missões</div></div></div>
+      <div class="block" data-cat="cat3"><div style="position:relative;width:44px;height:44px;"><svg width="44" height="44" viewBox="0 0 44 44" style="position:absolute;top:0;left:0;"><circle cx="22" cy="22" r="19" fill="none" stroke="#EEE" stroke-width="3.5"/><circle id="arc-cat3" cx="22" cy="22" r="19" fill="none" stroke="#EC7000" stroke-width="3.5" stroke-dasharray="0 119" stroke-dashoffset="30" stroke-linecap="round"/></svg><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;background:#E8F5ED;border-radius:50%;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1B5E35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg></div></div><div><div class="block-name">Relacional</div><div class="block-count" id="count-cat3">0 de 4 missões</div></div></div>
+      <div class="block" data-cat="cat4"><div style="position:relative;width:44px;height:44px;"><svg width="44" height="44" viewBox="0 0 44 44" style="position:absolute;top:0;left:0;"><circle cx="22" cy="22" r="19" fill="none" stroke="#EEE" stroke-width="3.5"/><circle id="arc-cat4" cx="22" cy="22" r="19" fill="none" stroke="#EC7000" stroke-width="3.5" stroke-dasharray="0 119" stroke-dashoffset="30" stroke-linecap="round"/></svg><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;background:#F5F0FF;border-radius:50%;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div></div><div><div class="block-name">Prevenção e Educação</div><div class="block-count" id="count-cat4">0 de 3 missões</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 4: LEVELS -->
+<div class="screen hidden white" id="s-levels">
+  <div class="nav"><span class="nav-back" id="btn-back-detail2">‹ Voltar</span><span class="nav-title">Níveis do programa</span><div style="width:60px"></div></div>
+  <div style="padding:16px 20px 40px;">
+    <p style="font-size:13px;color:#666;margin-bottom:20px;">Quanto mais você interage, mais você evolui e conquista vantagens.</p>
+    <!-- N1 -->
+    <div class="level-card" style="border:2px solid #CD7F32;">
+      <div class="level-header" style="background:#CD7F32;">
+        <svg width="54" height="54" viewBox="34 24 52 62"><path d="M60 28 L82 36 L82 58 C82 72 60 82 60 82 C60 82 38 72 38 58 L38 36 Z" fill="rgba(255,255,255,.3)"/><text x="60" y="55" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="#fff" font-family="-apple-system,sans-serif">1</text></svg>
+        <div><div style="font-size:11px;color:rgba(255,255,255,.8);font-weight:600;letter-spacing:.3px;">NÍVEL 1 · ATIVO</div><div style="font-size:16px;font-weight:800;color:#fff;">Essencial</div></div>
+        <div style="margin-left:auto;width:24px;height:24px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+      </div>
+      <div class="level-body">
+        <div class="level-benefit"><div class="benefit-icon" style="background:#F5E6D8;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CD7F32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.69 19a19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72"/></svg></div><div><div class="benefit-title">Fila especial no sinistro</div><div class="benefit-desc">Atendimento prioritário com dados cadastrais completos</div></div></div>
+        <div class="level-benefit"><div class="benefit-icon" style="background:#F5E6D8;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CD7F32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div><div><div class="benefit-title">Vale Proteção Itaú Shop · R$ 50</div><div class="benefit-desc">Crédito anual na renovação do seguro</div></div></div>
+        <div style="padding:10px 16px;font-size:12px;color:#CD7F32;font-weight:600;">✓ Nível atual · 6 escudos necessários</div>
+      </div>
+    </div>
+    <!-- N2 -->
+    <div class="level-card" style="border:1px solid #DDD;cursor:pointer;" id="btn-lv2">
+      <div class="level-header" style="background:#888888;">
+        <svg width="54" height="54" viewBox="34 24 52 62"><path d="M60 28 L82 36 L82 58 C82 72 60 82 60 82 C60 82 38 72 38 58 L38 36 Z" fill="rgba(255,255,255,.3)"/><text x="60" y="55" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="#fff" font-family="-apple-system,sans-serif">2</text></svg>
+        <div><div style="font-size:11px;color:rgba(255,255,255,.8);font-weight:600;letter-spacing:.3px;">NÍVEL 2 · BLOQUEADO</div><div style="font-size:16px;font-weight:800;color:#fff;">Engajado</div></div>
+        <div style="margin-left:auto;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+      </div>
+      <div class="level-body">
+        <div class="level-inherit">✓ Inclui todos os benefícios do Nível 1</div>
+        <div class="level-benefit"><div class="benefit-icon" style="background:#F0F0F0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div><div class="benefit-title">5% de desconto na renovação</div><div class="benefit-desc">Aplicado automaticamente na renovação anual</div></div></div>
+        <div class="level-benefit"><div class="benefit-icon" style="background:#F0F0F0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div><div class="benefit-title">5% off em novo produto Itaú Seguros</div><div class="benefit-desc">Desconto na contratação de um produto adicional</div></div></div>
+        <div class="level-benefit"><div class="benefit-icon" style="background:#F0F0F0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div><div><div class="benefit-title">Vale Proteção Itaú Shop · R$ 150</div><div class="benefit-desc">Crédito anual na renovação do seguro</div></div></div>
+        <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #F5F5F5;"><span style="font-size:12px;color:#aaa;font-weight:600;">Faltam 5 escudos para desbloquear</span><span style="font-size:11px;font-weight:700;color:#888;background:#F0F0F0;padding:4px 10px;border-radius:99px;">Ver benefícios disponíveis ›</span></div>
+      </div>
+    </div>
+    <!-- N3 -->
+    <div class="level-card" style="border:1px solid #E8D080;cursor:pointer;" id="btn-lv3">
+      <div class="level-header" style="background:#D4A017;">
+        <svg width="54" height="54" viewBox="34 24 52 62"><path d="M60 28 L82 36 L82 58 C82 72 60 82 60 82 C60 82 38 72 38 58 L38 36 Z" fill="rgba(255,255,255,.3)"/><text x="60" y="55" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="#fff" font-family="-apple-system,sans-serif">3</text></svg>
+        <div><div style="font-size:11px;color:rgba(255,255,255,.8);font-weight:600;letter-spacing:.3px;">NÍVEL 3 · BLOQUEADO</div><div style="font-size:16px;font-weight:800;color:#fff;">Referência</div></div>
+        <div style="margin-left:auto;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+      </div>
+      <div class="level-body">
+        <div class="level-inherit">✓ Mais benefícios para você</div>
+        <div class="level-benefit"><div class="benefit-icon" style="background:#FEF3C7;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4A017" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div><div class="benefit-title">10% de desconto na renovação</div><div class="benefit-desc">Upgrade do desconto do nível anterior</div></div></div>
+        <div class="level-benefit"><div class="benefit-icon" style="background:#FEF3C7;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4A017" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div><div class="benefit-title">10% off em novo produto Itaú Seguros</div><div class="benefit-desc">Desconto na contratação de um produto adicional</div></div></div>
+        <div class="level-benefit"><div class="benefit-icon" style="background:#FEF3C7;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4A017" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><div class="benefit-title">1 assistência adicional premium</div><div class="benefit-desc">Telemedicina ou assistência jurídica</div></div></div>
+        <div class="level-benefit"><div class="benefit-icon" style="background:#FEF3C7;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4A017" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div><div><div class="benefit-title">Vale Proteção Itaú Shop · R$ 300</div><div class="benefit-desc">Crédito anual na renovação do seguro</div></div></div>
+        <div class="level-benefit"><div class="benefit-icon" style="background:#FEF3C7;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4A017" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div><div class="benefit-title">5 números da sorte · Capitalização</div><div class="benefit-desc">Concorra a prêmios da Capitalização Itaú sem custo adicional.</div><div style="display:flex;align-items:center;gap:4px;margin-top:5px;"><svg width="12" height="12" viewBox="34 24 52 62" fill="#003087"><path d="M60 28 L82 36 L82 58 C82 72 60 82 60 82 C60 82 38 72 38 58 L38 36 Z"/></svg><span style="font-size:11px;color:#003087;font-weight:700;">Apenas para quem conquista todos os 22 escudos</span></div></div></div>
+        <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #F5F5F5;"><span style="font-size:12px;color:#aaa;font-weight:600;">Faltam 21 escudos para desbloquear</span><span style="font-size:11px;font-weight:700;color:#D4A017;background:#FEF3C7;padding:4px 10px;border-radius:99px;">Ver benefícios exclusivos ›</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREENS 5-8: CATEGORIAS -->
+<div class="screen hidden white" id="s-cat1">
+  <div class="nav"><span class="nav-back" data-back="s-detail">‹ Voltar</span><span class="nav-title">Completude Cadastral</span><div style="width:60px"></div></div>
+  <div class="cat-hero"><div class="cat-hero-title">Completude Cadastral</div><div class="cat-hero-sub">Garanta que seus dados estão prontos para o momento do sinistro.</div><div class="cat-progress-bar"><div class="cat-progress-fill" id="prog-cat1" style="width:20%;background:#EC7000;"></div></div><div class="cat-progress-label" id="lbl-cat1">1 de 5 missões · 1 de 6 escudos</div></div>
+  <div id="list-cat1"></div>
+</div>
+<div class="screen hidden white" id="s-cat2">
+  <div class="nav"><span class="nav-back" data-back="s-detail">‹ Voltar</span><span class="nav-title">Conhecimento do Produto</span><div style="width:60px"></div></div>
+  <div class="cat-hero"><div class="cat-hero-title">Conhecimento do Produto</div><div class="cat-hero-sub">Entenda sua cobertura e saiba como usar seu seguro quando precisar.</div><div class="cat-progress-bar"><div class="cat-progress-fill" id="prog-cat2" style="width:0%;background:#2563EB;"></div></div><div class="cat-progress-label" id="lbl-cat2">0 de 4 missões · 0 de 5 escudos</div></div>
+  <div id="list-cat2"></div>
+</div>
+<div class="screen hidden white" id="s-cat3">
+  <div class="nav"><span class="nav-back" data-back="s-detail">‹ Voltar</span><span class="nav-title">Relacional</span><div style="width:60px"></div></div>
+  <div class="cat-hero"><div class="cat-hero-title">Relacional</div><div class="cat-hero-sub">Amplie sua proteção e envolva quem você ama.</div><div class="cat-progress-bar"><div class="cat-progress-fill" id="prog-cat3" style="width:0%;background:#1B5E35;"></div></div><div class="cat-progress-label" id="lbl-cat3">0 de 4 missões · 0 de 7 escudos</div></div>
+  <div id="list-cat3"></div>
+</div>
+<div class="screen hidden white" id="s-cat4">
+  <div class="nav"><span class="nav-back" data-back="s-detail">‹ Voltar</span><span class="nav-title">Prevenção e Educação</span><div style="width:60px"></div></div>
+  <div class="cat-hero"><div class="cat-hero-title">Prevenção e Educação</div><div class="cat-hero-sub">Evolua sua consciência financeira e mantenha sua proteção atualizada.</div><div class="cat-progress-bar"><div class="cat-progress-fill" id="prog-cat4" style="width:0%;background:#7C3AED;"></div></div><div class="cat-progress-label" id="lbl-cat4">0 de 3 missões · 0 de 5 escudos</div></div>
+  <div id="list-cat4"></div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────
+var state = {
+  cat1: [true,false,false,false,false],
+  cat2: [false,false,false,false],
+  cat3: [false,false,false,false],
+  cat4: [false,false,false]
+};
+var pts = { cat1:[1,2,1,1,1], cat2:[1,2,1,1], cat3:[1,3,1,2], cat4:[2,2,1] };
+var TOTAL_MISSIONS = 15;
+var TOTAL_PTS = 22;
+var catMeta = {
+  cat1: {
+    missions:['Seguro ativado','Indicar beneficiário','Confirmar dados de contato','Confirmar conta bancária para indenização','Saber quais documentos usar no sinistro'],
+    descs:['Sua apólice está ativa e em vigência.','Nomeie quem receberá os benefícios do seu seguro.','Verifique se seu telefone e e-mail estão atualizados.','Confirme a conta bancária onde a indenização será depositada.','Conheça a lista de documentos necessários para acionar seu seguro.'],
+    annual:[false,false,false,false,false], totalPts:6
+  },
+  cat2: {
+    missions:['Quiz: o que seu seguro cobre?','Simular um acionamento','Descobrir o que seu seguro NÃO cobre','Saber como e onde acionar o seguro'],
+    descs:['Responda 3 perguntas rápidas sobre sua cobertura.','O que aconteceria se eu precisasse usar meu seguro agora?','Conheça as exclusões da sua apólice.','Canais disponíveis e passo a passo para acionar em caso de sinistro.'],
+    annual:[false,false,false,false], totalPts:5
+  },
+  cat3: {
+    missions:['Compartilhar resumo da apólice com familiar','Ter 2 ou mais produtos Itaú Seguros ativos','Convidar familiar ou amigo para conhecer o seguro','Manter 2+ produtos ativos por 12 meses'],
+    descs:['Envie um resumo da sua cobertura para cônjuge ou familiar próximo.','Ampliar sua proteção com mais produtos da carteira Itaú Seguros.','Indique um familiar ou amigo para conhecer os produtos Itaú Seguros.','Fidelidade e proteção contínua com múltiplos produtos.'],
+    annual:[false,false,false,true], totalPts:7
+  },
+  cat4: {
+    missions:['Concluir módulo de planejamento financeiro','Avaliar se sua cobertura cobre seu momento de vida atual','Responder pesquisa de satisfação sobre seu seguro'],
+    descs:['Conteúdo educativo sobre proteção e planejamento financeiro pessoal.','Mudou de emprego, teve filho ou comprou imóvel? Veja se sua proteção acompanha.','Nos conte sobre sua experiência — sua opinião melhora o programa.'],
+    annual:[false,false,false], totalPts:5
+  }
+};
+var levelCfg = {
+  1:{color:'#CD7F32',next:6},
+  2:{color:'#888888',next:15},
+  3:{color:'#D4A017',next:22}
+};
+
+// ── HELPERS ───────────────────────────────────────────────────────
+function countDone(cat){ return state[cat].filter(function(v){return v;}).length; }
+function countPts(cat){ return state[cat].reduce(function(s,v,i){return s+(v?pts[cat][i]:0);},0); }
+function totalDone(){ return Object.keys(state).reduce(function(s,c){return s+countDone(c);},0); }
+function totalEarned(){ return Object.keys(state).reduce(function(s,c){return s+countPts(c);},0); }
+function currentLevel(earned){
+  var c1ok = state.cat1.every(function(v){return v;});
+  var c2ok = state.cat2.every(function(v){return v;});
+  if(earned>=15 && c1ok && c2ok) return 3;
+  if(earned>=6) return 2;
+  return 1;
+}
+var C = 2*Math.PI*19;
+
+// ── NAVIGATION ────────────────────────────────────────────────────
+function show(id){ document.getElementById(id).classList.remove('hidden'); }
+function hide(id){ document.getElementById(id).classList.add('hidden'); }
+function go(to){ show(to); }
+function back(from,to){ hide(from); }
+
+// ── RENDER ────────────────────────────────────────────────────────
+function renderCat(cat){
+  var meta = catMeta[cat];
+  var done = countDone(cat);
+  var earned = countPts(cat);
+  var total = state[cat].length;
+  var pct = Math.round(done/total*100);
+  var prog = document.getElementById('prog-'+cat);
+  if(prog) prog.style.width = pct+'%';
+  var lbl = document.getElementById('lbl-'+cat);
+  if(lbl) lbl.textContent = done+' de '+total+' missões · '+earned+' de '+meta.totalPts+' escudos';
+  var list = document.getElementById('list-'+cat);
+  if(!list) return;
+  var doneArr=[], pendArr=[];
+  state[cat].forEach(function(v,i){ if(v) doneArr.push(i); else pendArr.push(i); });
+  var html='';
+  if(doneArr.length){
+    html+='<div class="section-lbl">Concluídas</div>';
+    doneArr.forEach(function(i){
+      var fixed = (cat==='cat1' && i===0);
+      var ann = meta.annual[i] ? '<span class="annual-tag">🔁 Anual</span>' : '';
+      html+='<div class="mission-item'+(fixed?'':' clickable')+'" data-cat="'+cat+'" data-idx="'+i+'">';
+      html+='<div class="mission-status done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>';
+      html+='<div><div class="mission-title done">'+meta.missions[i]+ann+'</div><div class="mission-desc">'+meta.descs[i]+'</div><span class="mission-pts done">+'+pts[cat][i]+' escudo'+(pts[cat][i]>1?'s':'')+' · Concluído</span></div>';
+      html+='</div>';
+    });
+  }
+  if(pendArr.length){
+    html+='<div class="section-lbl">Pendentes</div>';
+    pendArr.forEach(function(i){
+      var ann = meta.annual[i] ? '<span class="annual-tag">🔁 Anual</span>' : '';
+      html+='<div class="mission-item clickable" data-cat="'+cat+'" data-idx="'+i+'">';
+      html+='<div class="mission-status pending"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg></div>';
+      html+='<div><div class="mission-title">'+meta.missions[i]+ann+'</div><div class="mission-desc">'+meta.descs[i]+'</div><span class="mission-pts pending">+'+pts[cat][i]+' escudo'+(pts[cat][i]>1?'s':'')+' </span></div>';
+      html+='</div>';
+    });
+  }
+  list.innerHTML = html;
+  list.onclick = function(e){
+    var item = e.target.closest('.clickable');
+    if(!item) return;
+    var c = item.getAttribute('data-cat');
+    var idx = parseInt(item.getAttribute('data-idx'));
+    if(c==='cat1' && idx===0) return;
+    state[c][idx] = !state[c][idx];
+    renderCat(c);
+    updateAll();
+  };
+  // Update count on detail screen
+  var countEl = document.getElementById('count-'+cat);
+  if(countEl) countEl.textContent = done+' de '+total+' missões';
+  var arc = document.getElementById('arc-'+cat);
+  if(arc){
+    var filled = (done/total)*C;
+    var empty = C-filled;
+    arc.setAttribute('stroke-dasharray', filled.toFixed(1)+' '+empty.toFixed(1));
+  }
+}
+
+function updateAll(){
+  var done = totalDone();
+  var earned = totalEarned();
+  var pct = Math.round(done/TOTAL_MISSIONS*100);
+  var lvl = currentLevel(earned);
+  var cfg = levelCfg[lvl];
+
+  // Home mm card
+  var mmLabel = document.getElementById('mm-label');
+  if(mmLabel) mmLabel.textContent = done+' de '+TOTAL_MISSIONS+' missões concluídas';
+  var mmPct = document.getElementById('mm-pct');
+  if(mmPct) mmPct.textContent = pct+'%';
+  var mmFill = document.getElementById('mm-fill');
+  if(mmFill) mmFill.style.width = pct+'%';
+  var mmHexNum = document.getElementById('mm-hex-num');
+  if(mmHexNum){ mmHexNum.textContent = lvl; mmHexNum.style.color = cfg.color; }
+
+  // Hero
+  var heroTitle = document.getElementById('hero-title');
+  if(heroTitle) heroTitle.textContent = 'Você está no nível '+lvl;
+  var heroNum = document.getElementById('hero-num');
+  if(heroNum) heroNum.textContent = lvl;
+  var heroShield = document.getElementById('hero-shield');
+  if(heroShield) heroShield.setAttribute('fill', cfg.color);
+  var heroArc = document.getElementById('hero-arc');
+  if(heroArc){
+    heroArc.setAttribute('stroke', cfg.color);
+    var prev = lvl===1?0:lvl===2?6:15;
+    var prog2 = (earned-prev)/(cfg.next-prev);
+    var arcLen = 2*Math.PI*54*Math.max(0,Math.min(1,prog2));
+    heroArc.setAttribute('stroke-dasharray', arcLen.toFixed(1)+' '+(2*Math.PI*54-arcLen).toFixed(1));
+  }
+
+  // Stats
+  var statEarned = document.getElementById('stat-earned');
+  if(statEarned) statEarned.textContent = earned+' escudo'+(earned!==1?'s':'');
+
+  var c1ok = state.cat1.every(function(v){return v;});
+  var c2ok = state.cat2.every(function(v){return v;});
+  var blocked = earned>=15 && (!c1ok || !c2ok);
+
+  var statNextLabel = document.getElementById('stat-next-label');
+  var statNext = document.getElementById('stat-next');
+  var prereqContainer = document.getElementById('prereq-container');
+
+  if(prereqContainer) prereqContainer.innerHTML = '';
+
+  if(lvl===3){
+    if(statNextLabel) statNextLabel.textContent = 'Nível máximo atingido';
+    if(statNext) statNext.textContent = '🏆';
+  } else if(blocked){
+    if(statNextLabel) statNextLabel.textContent = 'Pré-requisitos pendentes';
+    if(statNext) statNext.textContent = 'Ver abaixo';
+    var missing=[];
+    if(!c1ok) missing.push('Completude Cadastral');
+    if(!c2ok) missing.push('Conhecimento do Produto');
+    if(prereqContainer){
+      prereqContainer.innerHTML = '<div class="prereq-warn" style="width:100%;margin-bottom:10px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EC7000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div class="prereq-warn-text">Para o nível 3, complete todas as missões de <strong>'+missing.join(' e ')+'</strong>.</div></div>';
+    }
+  } else {
+    var rem = cfg.next - earned;
+    if(statNextLabel) statNextLabel.textContent = 'Faltam para o nível '+(lvl+1);
+    if(statNext) statNext.textContent = rem+' escudo'+(rem!==1?'s':'');
+  }
+}
+
+// ── EVENT LISTENERS ───────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function(){
+  // Navigate to seguros
+  function goSeguros(){ go('s-seguros'); }
+  document.getElementById('btn-seguros').addEventListener('click', goSeguros);
+  document.getElementById('btn-seguros2').addEventListener('click', goSeguros);
+
+  // Back home
+  document.getElementById('btn-back-home').addEventListener('click', function(){ hide('s-seguros'); });
+
+  // Open MM detail
+  document.getElementById('btn-mm').addEventListener('click', function(){ go('s-detail'); });
+
+  // Back from detail
+  document.getElementById('btn-back-seg').addEventListener('click', function(){ hide('s-detail'); });
+
+  // Open levels
+  document.getElementById('btn-levels').addEventListener('click', function(){ go('s-levels'); });
+
+  // Back from levels
+  document.getElementById('btn-back-detail2').addEventListener('click', function(){ hide('s-levels'); });
+
+  // Open benefits (levels screen for now)
+  document.getElementById('btn-benefits').addEventListener('click', function(){ go('s-levels'); });
+
+  // Category blocks
+  document.querySelector('.blocks-grid').addEventListener('click', function(e){
+    var block = e.target.closest('.block');
+    if(!block) return;
+    var cat = block.getAttribute('data-cat');
+    if(!cat) return;
+    renderCat(cat);
+    go('s-'+cat);
+  });
+
+  // Back from cat screens
+  document.querySelectorAll('.nav-back[data-back]').forEach(function(el){
+    el.addEventListener('click', function(){
+      hide('s-'+el.closest('.screen').id.replace('s-',''));
+    });
+  });
+
+  // Levels 2 & 3 clickable
+  document.getElementById('btn-lv2').addEventListener('click', function(){ go('s-levels'); });
+  document.getElementById('btn-lv3').addEventListener('click', function(){ go('s-levels'); });
+
+  // Initial render
+  ['cat1','cat2','cat3','cat4'].forEach(function(c){ renderCat(c); });
+  updateAll();
+});
+</script>
+</body>
+</html>
